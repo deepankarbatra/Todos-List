@@ -1,24 +1,75 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Header from "./MyComponents/Header";
+import { About } from "./MyComponents/About";
+import { Todos } from "./MyComponents/Todos";
+import { Footer } from "./MyComponents/Footer"; /* {} are used in todos and footer because unlike header
+                                                 export const is used instead of export default*/
+import React, { useState, useEffect } from "react";
+import { AddTodo } from "./MyComponents/AddTodo";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 function App() {
+  let initTodo;
+  if (localStorage.getItem("todos") === null) {
+    initTodo = [];
+  } else {
+    initTodo = JSON.parse(localStorage.getItem("todos"));
+  }
+  const onDelete = (todo) => {
+    console.log("deleted", todo);
+    setTodos(
+      todos.filter((e) => {
+        return e !== todo;
+      })
+    );
+    localStorage.setItem("todos", JSON.stringify(todos));
+  };
+
+  const addTodo = (title, des) => {
+    console.log("i am adding ", title, des);
+    let sno;
+    if (todos.length === 0) {
+      sno = 0;
+    } else {
+      sno = todos[todos.length - 1].sno + 1;
+    }
+    const myTodo = {
+      sno: sno,
+      title: title,
+      des: des,
+    };
+    setTodos([...todos, myTodo]);
+    console.log(myTodo);
+  };
+
+  const [todos, setTodos] = useState(initTodo);
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Router>
+        <Header title="My Todos List" searchBar={true} />
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => {
+              return (
+                <>
+                  <AddTodo addTodo={addTodo} />
+                  <Todos todos={todos} onDelete={onDelete} />
+                </>
+              );
+            }}
+          ></Route>
+          <Route exact path="/about">
+            <About />
+          </Route>
+        </Switch>
+        <Footer />
+      </Router>
+    </>
   );
 }
 
